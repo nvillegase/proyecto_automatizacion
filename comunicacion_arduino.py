@@ -1,5 +1,6 @@
 import serial.tools.list_ports as ports
 import serial
+import OpenOPC
 
 from pprint import pprint
 from datetime import datetime
@@ -8,10 +9,15 @@ def serial_port_detect():
 
     pts = list(ports.comports())
     for p in pts:
-        device = p.device
-        return device
+        try:
+            device = p.device
+            return device
+        except Exception:
+            return '/dev/ttyACM0'
 
 if __name__ == '__main__':
+
+    opc = OpenOPC.client()
 
     device = serial_port_detect()
     arduino = serial.Serial(device, 115200, timeout=0.1)
@@ -23,7 +29,7 @@ if __name__ == '__main__':
             
             t_actual = datetime.now()
             
-            if arduino.in_waiting:
+            if arduino.inWaiting():
                 recibido = arduino.readline()
                 print("Mensaje recibido de Arduino: {}".format(recibido.decode('utf-8')))
 
